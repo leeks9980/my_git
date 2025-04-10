@@ -86,9 +86,31 @@ def image_masking(img_path, img_and_segmentation_Match):
 
         # 이미지 배경 제거
         masked_image = cv2.bitwise_and(image, image, mask=mask)   #bitwise_and(이미지1, 이미지2, 마스크) 마스크에 255값이 부분을 제외한 나머지 부분 제거
-        resized = cv2.resize(masked_image, (256,256))  #resize(이미지, (원하는x,y)) x, y 값으로 사진의 크기를 줄임
+        resized = cv2.resize(masked_image, (128, 128), interpolation=cv2.INTER_AREA) #이미지 축소 및 안티 엘리어싱
 
         # 결과 보기
         cv2.imshow("Masked Image", resized)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+#이물질 탐지(미완성)
+def foreign_object_detection(img_path):
+    image = cv2.imread(img_path)
+    resized = cv2.resize(image, (64, 64))
+
+    height, width, a = resized.shape 
+
+    for x in range(height):
+        for y in range(width):
+            neighbors = [   #이웃 픽셀 리스트
+                (x-1, y-1), (x-1, y), (x-1, y+1),  # 상좌, 상, 상우
+                (x, y-1), (x, y+1),                # 좌, 우
+                (x+1, y-1), (x+1, y), (x+1, y+1)   # 하좌, 하, 하우
+            ]
+            for n_x, n_y in neighbors:  #이웃 픽셀 불러오기
+                if 0 <= n_x < 64 and 0 <= n_y < 64:  # 경계 체크 
+                    current_pixel = resized[x, y].astype(int) #overflow 방지용
+                    neighbor_pixel = resized[n_x, n_y].astype(int) #overflow 방지용
+                    if sum(current_pixel) != 0 and sum(neighbor_pixel) != 0: #검정색 부분 넘기기
+                            if sum(current_pixel)/3 <= sum(neighbor_pixel)/3 - 45: #이상치 탐지(?)
+                                resized[x, y] = [0,0,255]
