@@ -4,10 +4,6 @@ from matplotlib import pyplot as plt #이미지 출력을 위한 라이브러리
 import numpy as np
 import json  #json파일을 읽기 위한 라이브러리
 
-#파일 경로
-img_path = 'C:/Users/leeks/mine/Service_Learning(Unsupervised_Learning)/원천데이터/TS1_시나노골드/당도A등급'
-json_path = 'C:/Users/leeks/mine/Service_Learning(Unsupervised_Learning)/라벨링데이터/TL1_시나노골드'
-
 
 #이미지 이름 리스트 만들기
 def Image_mask_area(img_path, json_path):
@@ -74,7 +70,7 @@ def Image_mask_area(img_path, json_path):
 
 
 #이미지 마스킹 작업
-def image_masking(img_and_segmentation_Match):
+def image_masking(img_path, img_and_segmentation_Match):
     for img, segmentation in img_and_segmentation_Match.items():
         # 이미지 불러오기
         os.chdir(img_path)
