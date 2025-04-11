@@ -117,6 +117,8 @@ def foreign_object_detection(img_path):
 
     height, width, a = resized.shape 
 
+    zero_matrix = np.zeros((128, 128))
+    
     for x in range(height):
         for y in range(width):
             neighbors = [   #이웃 픽셀 리스트
@@ -131,3 +133,8 @@ def foreign_object_detection(img_path):
                     if sum(current_pixel) != 0 and sum(neighbor_pixel) != 0: #검정색 부분 넘기기
                             if sum(current_pixel)/3 <= sum(neighbor_pixel)/3 - 45: #이상치 탐지(?)
                                 resized[x, y] = [0,0,255]
+                                zero_matrix[x, y] = 1 #분산을 구하기 위한 푯
+
+    zero_matrix = zero_matrix.reshape(-1)
+    if np.var(zero_matrix) >= 300: #분산값 으로 나뭇가지 식별
+        print('나뭇가지',img_path)
