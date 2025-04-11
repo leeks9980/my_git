@@ -103,7 +103,7 @@ def image_masking_anti_aliasing(img_path, img_and_segmentation_Match):
         resized = cv2.resize(masked_image, (128, 128)) #이미지 축소 및 안티 엘리어싱 , interpolation=cv2.INTER_AREA
 
         #결과물 저장
-        cv2.imwrite(f'C:/Users/leeks/mine/Service_Learning(Unsupervised_Learning)/test/output_{a}.png', resized)
+        cv2.imwrite(f'/Service_Learning(Unsupervised_Learning)/test/output_{a}.png', resized)
         
         # 결과 보기
         #cv2.imshow("Masked Image", resized)
