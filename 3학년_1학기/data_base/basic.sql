@@ -151,3 +151,27 @@ set @myvar = 10; -- 변수 선언 및 값 대입
 select @myvar; -- 변수 호출
 
 select mem_name, height from member order by height limit @myvar; -- limit에는 변수를 넣을수 없음
+
+-- join문
+select * from buy b -- b은 buy의미
+	inner join member m -- m은 member의미
+    on b.mem_id = m.mem_id  -- 같은 행으로 조인 하겠다
+    where b.mem_id ='GRL';
+
+select * from buy b 
+	inner join member m 
+    on b.mem_id = m.mem_id; -- where절을 뺴면 모든 행 조인
+
+select mem_id, mem_name, prod_name, addr, concat(phone1, phone2) '연락처' from buy -- mem_id가 두개의 테이블에 중복으로 있어
+	inner join member
+    on buy.mem_id = member.mem_id;
+    
+select buy.mem_id, mem_name, prod_name, addr, concat(phone1, phone2) '연락처' from buy -- mem_id가 어느 테이블에서 쓸건지 지정 해줘야함
+	inner join member
+    on buy.mem_id = member.mem_id;
+
+
+
+
+
+
