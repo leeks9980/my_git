@@ -77,3 +77,14 @@ SELECT b.mem_id, m.mem_name, b.prod_name, m.addr FROM buy b
     INNER JOIN member m 
     ON b.mem_id = m.mem_id
     ORDER BY b.mem_id;  -- 출력값은 member테이블과 buy테이블에서 서로 같은 값만 출력
+
+--  unsigned
+create table member(
+    mem_id CHAR(8) NOT NULL PRIMARY KEY,
+    mem_name VARCHAR(10) NOT NULL,
+    mem_number TINYINT NOT NULL,
+    addr CHAR(2) NOT NULL,
+    phone1 CHAR(3),
+    phone2 CHAR(8),
+    height TINYINT UNSIGNED,  -- TInyint의 범위가 -128 ~ 127 까지 이면 0 ~ 255 까지로 범위를 0부터 시작하게 함
+    debut_date DATE );
