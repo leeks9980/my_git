@@ -1,13 +1,17 @@
 import toolbox as tb
 
-img_path = '/Service_Learning(Unsupervised_Learning)/원천데이터/TS1_시나노골드/당도A등급'
-json_path = '/Service_Learning(Unsupervised_Learning)/라벨링데이터/TL1_시나노골드'
+img_path = '이미지 파일 경로'
+json_path = 'json 파일 경로'
+save_path = "저장 경로"
 
-#이미지 이름 과 세그메테이션 이름 딕션너리
-Label = tb.Image_mask_area(img_path, json_path)
+dirty_path = "비정상 이미지 경로"
+clean_path = "정상 이미지 경로"
 
-#탈락 이미지 선택
-del_img = tb.del_img(img_path, Label)
+model_path = "모델 경로" 
 
-#이미지 마스크 작업
-tb.image_masking_anti_aliasing(img_path, del_img)
+preprocessor = tb.image_preprocessing(img_path, json_path)
+
+preprocessor.Image_mask_area()
+preprocessor.del_img()
+preprocessor.image_masking(save_path)
+preprocessor.cnn_classification(clean_path, dirty_path,model_path)
