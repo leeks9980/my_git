@@ -6,11 +6,12 @@ import json  #json파일을 읽기 위한 라이브러리
 import shutil
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import array_to_img
 import numpy as np
 
 
 class image_preprocessing:
-    def __init__(self, img_path, json_path):
+    def __init__(self, img_path, json_path, save_path):
         self.img_path = img_path
         self.json_path = json_path
 
@@ -93,67 +94,46 @@ class image_preprocessing:
 
 
     #이미지 마스킹 작업
-    def image_masking(self, save_path):
-        self.save_path = save_path
-        a = 0
-        for img, segmentation in self.img_and_segmentation_Match.items():
-            a = a + 1   
-            # 이미지 불러오기
-            os.chdir(self.img_path)
-            image = cv2.imread(img)  # shape: (H, W, 3)
-
-            # 세그멘테이션 좌표 준비
-            segmentation_spot = np.array(segmentation, dtype=np.int32).reshape((-1, 2)) #(N, 2)의 2차원 배열로 바꾸는 것
-
-            # 마스크 생성 (흰색이 객체 영역)
-            mask = np.zeros(image.shape[:2], dtype=np.uint8) #image.shape[:2] 앞에 있는 2가지 값만 가져오기 
-            cv2.fillPoly(mask, [segmentation_spot], 255)   #fillPoly(대상 이미지, 다격형 좌표, 색상(0~255)) 다각형 내부를 체워 주는 함수
-
-            # 이미지 배경 제거
-            masked_image = cv2.bitwise_and(image, image, mask=mask)   #bitwise_and(이미지1, 이미지2, 마스크) 마스크에 255값이 부분을 제외한 나머지 부분 제거
-            resized = cv2.resize(masked_image, (128, 128)) #이미지 축소  , interpolation=cv2.INTER_AREA
-            
-            saved_path = os.path.join(save_path, f'output_{a}.png')  #저장 경로 설정
-            #결과물 저장
-            cv2.imwrite(saved_path, resized)
-
-    def cnn_classification(self, output_clean_adress, output_dirty_adress, model_path):
+    def mask_and_classify(self, output_clean_adress, output_dirty_adress, model_path):
         model = load_model(model_path)
-
-        # 2. 경로 설정
-        input_folder = self.save_path
-        output_clean = output_clean_adress
-        output_dirty = output_dirty_adress
+        os.makedirs(output_clean_adress, exist_ok=True)
+        os.makedirs(output_dirty_adress, exist_ok=True)
         image_size = (124, 124)
 
-        # 3. 출력 폴더 생성
-        os.makedirs(output_clean, exist_ok=True)
-        os.makedirs(output_dirty, exist_ok=True)
-
-        # 4. 예측 및 저장
         dirty_count = 0
         total_count = 0
 
-        for fname in os.listdir(input_folder):
-            if fname.lower().endswith(('.jpg', '.jpeg', '.png')):
-                total_count += 1
-                img_path = os.path.join(input_folder, fname)
-                img = image.load_img(img_path, target_size=image_size)
-                img_array = image.img_to_array(img) / 255.0
-                img_array = np.expand_dims(img_array, axis=0)
+        os.chdir(self.img_path)
 
-                prediction = model.predict(img_array, verbose=0)
-                prob = prediction[0][0]
+        for img_name, segmentation in self.img_and_segmentation_Match.items():
+            total_count += 1
 
-                if prob > 0.5:
-                    dirty_count += 1
-                    shutil.copy(img_path, os.path.join(output_dirty, fname))
-                else:
-                    shutil.copy(img_path, os.path.join(output_clean, fname))
+            # 이미지 불러오기
+            image = cv2.imread(img_name)
+            segmentation_spot = np.array(segmentation, dtype=np.int32).reshape((-1, 2))
+            mask = np.zeros(image.shape[:2], dtype=np.uint8)
+            cv2.fillPoly(mask, [segmentation_spot], 255)
+            masked_image = cv2.bitwise_and(image, image, mask=mask)
 
-        # 5. 통계 출력
+            # CNN 입력용 전처리
+            resized = cv2.resize(masked_image, image_size)
+            resized_rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+            img_array = resized_rgb.astype('float32') / 255.0
+            img_array = np.expand_dims(img_array, axis=0)
+
+            # 분류
+            prediction = model.predict(img_array, verbose=0)
+            prob = prediction[0][0]
+
+            # 결과 저장
+            if prob > 0.5:
+                dirty_count += 1
+                save_path = os.path.join(output_dirty_adress, img_name)
+            else:
+                save_path = os.path.join(output_clean_adress, img_name)
+
+            cv2.imwrite(save_path, resized)
+
         print(f"\n총 이미지 수: {total_count}장")
         print(f"불순물 없는 이미지 수: {dirty_count}장")
         print(f"정상 비율: {dirty_count / total_count:.2%}")
-
-
