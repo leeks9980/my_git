@@ -1,15 +1,12 @@
 import toolbox as tb
 
-img_path = '이미지 파일 경로'
-json_path = 'json 파일 경로'
+j = 'json 폴더 경로'
+img = '사진 폴더 경로'
+masked_i = '전처리 이미지 저장 경로'
 
-dirty_path = "비정상 이미지 경로"
-clean_path = "정상 이미지 경로"
+preprocessing = tb.image_preprocessing(img, j)
 
-model_path = "모델 경로" 
-
-preprocessor = tb.image_preprocessing(img_path, json_path)
-
-preprocessor.Image_mask_area()
-preprocessor.del_img()
-preprocessor.mask_and_classify()
+preprocessing.Image_mask_area()
+print('완료')
+preprocessing.masking(masked_i)
+print('완료')
