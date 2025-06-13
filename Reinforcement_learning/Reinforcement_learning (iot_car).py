@@ -8,9 +8,9 @@ num_actions = len(move_directions)
 
 grid = np.array([
     [-0.1, -1, -0.1, -0.1],
-    [-0.1, -0.1, -0.1, -0.1],
-    [-0.1, -0.1, -1, -0.1],
-    [-0.1, -0.1, -1, 1.0]
+    [-0.1, -1, -0.1, -0.1],
+    [-0.1, -0.1, -0.1, -1],
+    [-0.1, -1, -0.1, 1.0]
 ])
 
 GRID_ROWS, GRID_COLS = grid.shape
@@ -96,7 +96,10 @@ for episode in range(num_episodes):
         agent.current_position = next_state
         current_state = next_state
 
-        if current_state == goal_position:
+        # --- 여기를 수정했습니다 ---
+        # 목표 지점 또는 패널티 지점에 도달하면 에피소드 종료
+        if current_state == goal_position or current_state == penalty_position:
+            # print(f"    --> 에피소드 종료! (도달: {current_state})") # 디버깅용
             break
             
 print("\n--- Q-러닝 시뮬레이션 완료 ---")
@@ -132,6 +135,8 @@ for step in range(max_steps_per_episode):
 
     print(f"스텝 {step+1}: 현재 위치 {test_current_state}, 선택 행동 '{action}', 보상 {reward:.2f}, 총 점수 {test_score:.2f}")
 
+    # --- 여기를 수정했습니다 ---
+    # 목표 지점 또는 패널티 지점에 도달하면 시뮬레이션 종료
     if test_current_state == goal_position:
         print(f"*** 목표 도달! 최종 경로: {path} ***")
         print(f"*** 최종 점수: {test_score:.2f} ***")
