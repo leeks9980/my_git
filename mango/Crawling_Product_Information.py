@@ -54,10 +54,14 @@ def parse_product_info(html):
             content = dd.get_text(" ", strip=True)
             product_info[title] = content
     
-    #Save only the parts you want
+    #Change to desired format
     filtered_info = {k: product_info[k] for k in wanted_keys if k in product_info}
     final_info = {key_name_map[k]: v for k, v in filtered_info.items()}
+    asd = final_info['성분']
+    ingredients = asd.split(",")
+    final_info['성분'] = ingredients 
     
+    #Save only the parts you want
     with open("filtered_product_info.csv", mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["항목", "내용"])
