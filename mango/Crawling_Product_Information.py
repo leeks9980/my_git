@@ -41,10 +41,11 @@ key_name_map = {
     "화장품법에 따라 기재해야 하는 모든 성분": "성분"
 }
 
-#Find product details
+#Find product information and product name
 def parse_product_info(html):
     soup = BeautifulSoup(html, "html.parser")
-
+    
+    #Product Information
     product_info = {}
     for dl in soup.select("#artcInfo dl.detail_info_list"):
         dt = dl.find("dt")
@@ -54,12 +55,17 @@ def parse_product_info(html):
             content = dd.get_text(" ", strip=True)
             product_info[title] = content
     
+    #Product name
+    product_name = soup.find("p", class_="prd_name").text.strip()
+
     #Change to desired format
     filtered_info = {k: product_info[k] for k in wanted_keys if k in product_info}
     final_info = {key_name_map[k]: v for k, v in filtered_info.items()}
     asd = final_info['성분']
     ingredients = asd.split(",")
     final_info['성분'] = ingredients 
+    final_info['제품명'] = product_name
+
     
     #Save only the parts you want
     with open("filtered_product_info.csv", mode="w", newline="", encoding="utf-8") as file:
