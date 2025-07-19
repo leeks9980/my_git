@@ -50,20 +50,19 @@ for Category in list_1:
             page_html_2.append(html_1)
         page_html_1[key] = page_html_2
 
-    #Parsing product page url
-    product_page_url_1 = {}
-    for key, value in page_html_1.items():
-        product_page_url_2 = []
-        for html_2 in value:
-            info = prep.Product_Information_Address(html_2)
-            for i in info:
-                product_page_url_2.append(i)
-        product_page_url_1[key] = product_page_url_2
-        with open(f"{key}_page_url_1.csv", "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(["prd", "url"])  
-            for category_1, urls in product_page_url_1.items():
-                for url in urls:
-                    writer.writerow([category_1, url])
+        #Parsing product page url
+        product_page_url_1 = {}
+        for key, value in page_html_1.items():
+            product_page_url_2 = []
+            for html_2 in value:
+                info = prep.Product_Information_Address(html_2)
+                for i in info:
+                    product_page_url_2.append(i)
+            product_page_url_1[key] = product_page_url_2
+            with open(f"{key}_page_url_1.csv", "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["prd", "url"])  
+                for category_1, urls in product_page_url_1.items():
+                    for url in urls:
+                        writer.writerow([category_1, url])
     time.sleep(random.uniform(30, 150))  #IP blocking prevention
-
