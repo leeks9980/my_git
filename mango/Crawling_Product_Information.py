@@ -12,7 +12,7 @@ def fetch_full_html(url, output_path="full_page.html"):
 
     try:
         driver.get(url)
-        time.sleep(7) 
+        time.sleep(10) 
 
         html = driver.page_source
 
@@ -35,13 +35,10 @@ def parse_product_info(html):
 
     return product_info
 
-product_url = "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000170266&dispCatNo=90000010001"
+product_url = "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000191214&dispCatNo=100000100070017&t_page=%EC%B9%B4%ED%85%8C%EA%B3%A0%EB%A6%AC%EA%B4%80&t_click=%ED%94%84%EB%9E%98%EA%B7%B8%EB%9F%B0%EC%8A%A4_%EC%A0%84%EC%B2%B4__%EC%83%81%ED%92%88%EC%83%81%EC%84%B8&t_number=6"
 html = fetch_full_html(product_url)
 info = parse_product_info(html)
 
 print(" 상품 상세 정보:")
 for key, value in info.items():
     print(f"{key} : {value}")
-
-
-print("\n📄 저장 완료: product_info.txt")
