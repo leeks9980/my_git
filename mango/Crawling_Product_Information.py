@@ -2,7 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
 from bs4 import BeautifulSoup
+import pyautogui
+import csv
 
+#html parsing
 def fetch_full_html(url, output_path="full_page.html"):
     options = Options()
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -12,8 +15,13 @@ def fetch_full_html(url, output_path="full_page.html"):
 
     try:
         driver.get(url)
-        time.sleep(10) 
-
+        
+        pyautogui.moveTo(1168, 1298, duration=1)  #Physical coordinates
+        time.sleep(3)  #Time to go beyond security
+        pyautogui.scroll(-620)
+        time.sleep(4)  #Page loading time
+        pyautogui.leftClick()
+        time.sleep(0.5)  #Click time
         html = driver.page_source
 
         return html
@@ -21,9 +29,23 @@ def fetch_full_html(url, output_path="full_page.html"):
     finally:
         driver.quit()
 
+wanted_keys = [
+    "사용기한(또는 개봉 후 사용기간)",
+    "사용방법",
+    "화장품법에 따라 기재해야 하는 모든 성분"
+]
+
+key_name_map = {
+    "사용기한(또는 개봉 후 사용기간)": "사용기한",
+    "사용방법": "사용방법",
+    "화장품법에 따라 기재해야 하는 모든 성분": "성분"
+}
+
+#Find product information and product name
 def parse_product_info(html):
     soup = BeautifulSoup(html, "html.parser")
-
+    
+    #Product Information
     product_info = {}
     for dl in soup.select("#artcInfo dl.detail_info_list"):
         dt = dl.find("dt")
@@ -32,10 +54,28 @@ def parse_product_info(html):
             title = dt.get_text(strip=True)
             content = dd.get_text(" ", strip=True)
             product_info[title] = content
+    
+    #Product name
+    product_name = soup.find("p", class_="prd_name").text.strip()
 
+    #Change to desired format
+    filtered_info = {k: product_info[k] for k in wanted_keys if k in product_info}
+    final_info = {key_name_map[k]: v for k, v in filtered_info.items()}
+    asd = final_info['성분']
+    ingredients = asd.split(",")
+    final_info['성분'] = ingredients 
+    final_info['제품명'] = product_name
+
+    
+    #Save only the parts you want
+    with open("filtered_product_info.csv", mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["항목", "내용"])
+        for key, value in final_info.items():
+            writer.writerow([key, value])
     return product_info
 
-product_url = "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000191214&dispCatNo=100000100070017&t_page=%EC%B9%B4%ED%85%8C%EA%B3%A0%EB%A6%AC%EA%B4%80&t_click=%ED%94%84%EB%9E%98%EA%B7%B8%EB%9F%B0%EC%8A%A4_%EC%A0%84%EC%B2%B4__%EC%83%81%ED%92%88%EC%83%81%EC%84%B8&t_number=6"
+product_url = "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000170266&dispCatNo=90000010001"
 html = fetch_full_html(product_url)
 info = parse_product_info(html)
 
